@@ -27,12 +27,18 @@ fn generate_id() -> String {
 }
 
 fn rand_value() -> u64 {
-    SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default().as_nanos() as u64
+    SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos() as u64
 }
 
 impl Bid {
     pub fn new(bidder: &str, amount: f64) -> Self {
-        let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default().as_secs_f64();
+        let ts = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs_f64();
         Self {
             bidder: bidder.into(),
             amount,
@@ -59,7 +65,9 @@ impl Bid {
 }
 
 impl PartialEq for Bid {
-    fn eq(&self, other: &Self) -> bool { self.id == other.id }
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl Eq for Bid {}

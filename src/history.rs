@@ -25,7 +25,9 @@ pub struct AuctionHistory {
 }
 
 impl AuctionHistory {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     pub fn record(&mut self, result: &AuctionResult) -> AuctionRecord {
         let rec = AuctionRecord {
@@ -41,16 +43,28 @@ impl AuctionHistory {
         rec
     }
 
-    pub fn records(&self) -> &[AuctionRecord] { &self.records }
-    pub fn len(&self) -> usize { self.records.len() }
-    pub fn is_empty(&self) -> bool { self.records.is_empty() }
+    pub fn records(&self) -> &[AuctionRecord] {
+        &self.records
+    }
+    pub fn len(&self) -> usize {
+        self.records.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.records.is_empty()
+    }
 
     pub fn by_winner(&self, bidder: &str) -> Vec<&AuctionRecord> {
-        self.records.iter().filter(|r| r.winner.as_deref() == Some(bidder)).collect()
+        self.records
+            .iter()
+            .filter(|r| r.winner.as_deref() == Some(bidder))
+            .collect()
     }
 
     pub fn by_type(&self, auction_type: AuctionType) -> Vec<&AuctionRecord> {
-        self.records.iter().filter(|r| r.auction_type == auction_type).collect()
+        self.records
+            .iter()
+            .filter(|r| r.auction_type == auction_type)
+            .collect()
     }
 
     pub fn total_revenue(&self) -> f64 {
@@ -58,7 +72,9 @@ impl AuctionHistory {
     }
 
     pub fn average_clearing_price(&self) -> f64 {
-        if self.records.is_empty() { return 0.0; }
+        if self.records.is_empty() {
+            return 0.0;
+        }
         self.records.iter().map(|r| r.clearing_price).sum::<f64>() / self.records.len() as f64
     }
 
@@ -72,13 +88,18 @@ impl AuctionHistory {
                 entry.1 += r.winning_amount;
             }
         }
-        let mut board: Vec<_> = stats.into_iter().map(|(k, (wins, spent))| (k, wins, spent)).collect();
+        let mut board: Vec<_> = stats
+            .into_iter()
+            .map(|(k, (wins, spent))| (k, wins, spent))
+            .collect();
         board.sort_by(|a, b| b.1.cmp(&a.1));
         board.truncate(limit);
         board
     }
 
-    pub fn clear(&mut self) { self.records.clear(); }
+    pub fn clear(&mut self) {
+        self.records.clear();
+    }
 }
 
 #[cfg(test)]
@@ -87,9 +108,13 @@ mod tests {
 
     fn make_result(winner: &str, amount: f64) -> AuctionResult {
         AuctionResult {
-            auction_id: "test".into(), auction_type: AuctionType::Sealed,
-            winner: Some(winner.into()), winning_amount: amount, clearing_price: amount,
-            bids_evaluated: 2, settled_at: None,
+            auction_id: "test".into(),
+            auction_type: AuctionType::Sealed,
+            winner: Some(winner.into()),
+            winning_amount: amount,
+            clearing_price: amount,
+            bids_evaluated: 2,
+            settled_at: None,
         }
     }
 

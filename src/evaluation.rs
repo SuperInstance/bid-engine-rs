@@ -31,19 +31,41 @@ pub struct BidEvaluator {
 
 impl BidEvaluator {
     pub fn new(strategy: ScoreStrategy) -> Self {
-        Self { strategy, min_amount: None, max_amount: None }
+        Self {
+            strategy,
+            min_amount: None,
+            max_amount: None,
+        }
     }
 
-    pub fn with_min_amount(mut self, min: f64) -> Self { self.min_amount = Some(min); self }
-    pub fn with_max_amount(mut self, max: f64) -> Self { self.max_amount = Some(max); self }
+    pub fn with_min_amount(mut self, min: f64) -> Self {
+        self.min_amount = Some(min);
+        self
+    }
+    pub fn with_max_amount(mut self, max: f64) -> Self {
+        self.max_amount = Some(max);
+        self
+    }
 
     pub fn filter_bids<'a>(&self, bids: &'a [Bid]) -> Vec<&'a Bid> {
-        bids.iter().filter(|b| {
-            if !b.is_valid() { return false; }
-            if let Some(min) = self.min_amount { if b.amount < min { return false; } }
-            if let Some(max) = self.max_amount { if b.amount > max { return false; } }
-            true
-        }).collect()
+        bids.iter()
+            .filter(|b| {
+                if !b.is_valid() {
+                    return false;
+                }
+                if let Some(min) = self.min_amount {
+                    if b.amount < min {
+                        return false;
+                    }
+                }
+                if let Some(max) = self.max_amount {
+                    if b.amount > max {
+                        return false;
+                    }
+                }
+                true
+            })
+            .collect()
     }
 
     fn score(&self, bid: &Bid) -> f64 {
@@ -51,7 +73,11 @@ impl BidEvaluator {
             ScoreStrategy::AmountDesc => bid.amount,
             ScoreStrategy::AmountAsc => -bid.amount,
             ScoreStrategy::Recency => -bid.timestamp,
-            ScoreStrategy::Confidence => bid.metadata.get("confidence").and_then(|v| v.as_f64()).unwrap_or(0.0),
+            ScoreStrategy::Confidence => bid
+                .metadata
+                .get("confidence")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0),
         }
     }
 
@@ -59,9 +85,15 @@ impl BidEvaluator {
         let filtered = self.filter_bids(bids);
         let mut scored: Vec<_> = filtered.into_iter().map(|b| (b, self.score(b))).collect();
         scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-        scored.into_iter().enumerate().map(|(i, (bid, score))| RankedBid {
-            bid: bid.clone(), score, rank: i + 1,
-        }).collect()
+        scored
+            .into_iter()
+            .enumerate()
+            .map(|(i, (bid, score))| RankedBid {
+                bid: bid.clone(),
+                score,
+                rank: i + 1,
+            })
+            .collect()
     }
 
     pub fn top_n(&self, bids: &[Bid], n: usize) -> Vec<RankedBid> {

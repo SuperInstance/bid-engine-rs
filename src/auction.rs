@@ -54,8 +54,14 @@ pub struct Auction {
 
 impl Auction {
     pub fn new(auction_type: AuctionType) -> Self {
-        let id = format!("{:010x}", std::time::SystemTime::now()
-            .duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap_or_default().as_nanos() as u64 % 0xFFFFFFFFFF);
+        let id = format!(
+            "{:010x}",
+            std::time::SystemTime::now()
+                .duration_since(std::time::SystemTime::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_nanos() as u64
+                % 0xFFFFFFFFFF
+        );
         Self {
             id,
             auction_type,
@@ -71,9 +77,19 @@ impl Auction {
         }
     }
 
-    pub fn with_reserve(mut self, price: f64) -> Self { self.reserve_price = price; self }
-    pub fn with_starting_price(mut self, price: f64) -> Self { self.starting_price = price; self.current_price = price; self }
-    pub fn with_decrement(mut self, step: f64) -> Self { self.decrement_step = step; self }
+    pub fn with_reserve(mut self, price: f64) -> Self {
+        self.reserve_price = price;
+        self
+    }
+    pub fn with_starting_price(mut self, price: f64) -> Self {
+        self.starting_price = price;
+        self.current_price = price;
+        self
+    }
+    pub fn with_decrement(mut self, step: f64) -> Self {
+        self.decrement_step = step;
+        self
+    }
 
     pub fn open(&mut self) -> Result<(), String> {
         if self.state != AuctionState::Pending {
@@ -96,7 +112,10 @@ impl Auction {
             AuctionType::English => {
                 if let Some(ref highest) = self.current_highest {
                     if bid.amount <= highest.amount {
-                        return Err(format!("English: bid {} must exceed current highest {}", bid.amount, highest.amount));
+                        return Err(format!(
+                            "English: bid {} must exceed current highest {}",
+                            bid.amount, highest.amount
+                        ));
                     }
                 }
                 self.current_price = bid.amount;
@@ -110,7 +129,9 @@ impl Auction {
                 self.current_highest = Some(bid.clone());
                 self.bids.push(bid);
             }
-            _ => { self.bids.push(bid); }
+            _ => {
+                self.bids.push(bid);
+            }
         }
         Ok(())
     }
@@ -154,7 +175,10 @@ impl Auction {
         } else {
             match self.auction_type {
                 AuctionType::English | AuctionType::Dutch => {
-                    let best = valid.iter().max_by(|a, b| a.amount.partial_cmp(&b.amount).unwrap()).unwrap();
+                    let best = valid
+                        .iter()
+                        .max_by(|a, b| a.amount.partial_cmp(&b.amount).unwrap())
+                        .unwrap();
                     AuctionResult {
                         auction_id: self.id.clone(),
                         auction_type: self.auction_type,
@@ -166,7 +190,10 @@ impl Auction {
                     }
                 }
                 AuctionType::Sealed => {
-                    let best = valid.iter().max_by(|a, b| a.amount.partial_cmp(&b.amount).unwrap()).unwrap();
+                    let best = valid
+                        .iter()
+                        .max_by(|a, b| a.amount.partial_cmp(&b.amount).unwrap())
+                        .unwrap();
                     let (winner, price) = if best.amount >= self.reserve_price {
                         (Some(best.bidder.clone()), best.amount)
                     } else {
@@ -186,7 +213,11 @@ impl Auction {
                     let mut sorted: Vec<&&Bid> = valid.iter().collect();
                     sorted.sort_by(|a, b| b.amount.partial_cmp(&a.amount).unwrap());
                     let best = sorted[0];
-                    let second_price = if sorted.len() > 1 { sorted[1].amount } else { self.reserve_price };
+                    let second_price = if sorted.len() > 1 {
+                        sorted[1].amount
+                    } else {
+                        self.reserve_price
+                    };
                     let payment = second_price.max(self.reserve_price);
                     AuctionResult {
                         auction_id: self.id.clone(),
@@ -214,9 +245,15 @@ impl Auction {
         Ok(())
     }
 
-    pub fn bids(&self) -> &[Bid] { &self.bids }
-    pub fn bid_count(&self) -> usize { self.bids.len() }
-    pub fn get_result(&self) -> Option<&AuctionResult> { self.result.as_ref() }
+    pub fn bids(&self) -> &[Bid] {
+        &self.bids
+    }
+    pub fn bid_count(&self) -> usize {
+        self.bids.len()
+    }
+    pub fn get_result(&self) -> Option<&AuctionResult> {
+        self.result.as_ref()
+    }
 }
 
 #[cfg(test)]
@@ -269,7 +306,9 @@ mod tests {
 
     #[test]
     fn test_dutch_auction() {
-        let mut a = Auction::new(AuctionType::Dutch).with_starting_price(100.0).with_decrement(10.0);
+        let mut a = Auction::new(AuctionType::Dutch)
+            .with_starting_price(100.0)
+            .with_decrement(10.0);
         a.open().unwrap();
         a.dutch_decrement().unwrap();
         a.place_bid(Bid::new("alice", 90.0)).unwrap();

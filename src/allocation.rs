@@ -22,7 +22,9 @@ pub struct AllocationResult {
 }
 
 impl AllocationResult {
-    pub fn is_empty(&self) -> bool { self.allocations.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.allocations.is_empty()
+    }
 }
 
 /// Distribute resources to bidders.
@@ -33,7 +35,10 @@ pub struct ResourceAllocator {
 
 impl ResourceAllocator {
     pub fn new(total_resources: f64, resource_id: &str) -> Self {
-        Self { total_resources, resource_id: resource_id.into() }
+        Self {
+            total_resources,
+            resource_id: resource_id.into(),
+        }
     }
 
     /// Give entire resource pool to auction winner.
@@ -60,11 +65,19 @@ impl ResourceAllocator {
     pub fn allocate_proportional(&self, bids: &[Bid]) -> AllocationResult {
         let valid: Vec<&Bid> = bids.iter().filter(|b| b.is_valid()).collect();
         if valid.is_empty() {
-            return AllocationResult { allocations: Vec::new(), unallocated_bidders: Vec::new(), total_allocated: 0.0 };
+            return AllocationResult {
+                allocations: Vec::new(),
+                unallocated_bidders: Vec::new(),
+                total_allocated: 0.0,
+            };
         }
         let total_bid: f64 = valid.iter().map(|b| b.amount).sum();
         if total_bid <= 0.0 {
-            return AllocationResult { allocations: Vec::new(), unallocated_bidders: Vec::new(), total_allocated: 0.0 };
+            return AllocationResult {
+                allocations: Vec::new(),
+                unallocated_bidders: Vec::new(),
+                total_allocated: 0.0,
+            };
         }
         let mut allocations = Vec::new();
         let mut total_allocated = 0.0;
@@ -77,7 +90,11 @@ impl ResourceAllocator {
                 amount: share,
             });
         }
-        AllocationResult { allocations, unallocated_bidders: Vec::new(), total_allocated }
+        AllocationResult {
+            allocations,
+            unallocated_bidders: Vec::new(),
+            total_allocated,
+        }
     }
 
     /// Give each winner a fixed-size bundle.
@@ -88,7 +105,11 @@ impl ResourceAllocator {
         let mut unallocated = Vec::new();
         // Sort by amount descending — highest bidders get bundles first
         let mut sorted = valid.clone();
-        sorted.sort_by(|a, b| b.amount.partial_cmp(&a.amount).unwrap_or(std::cmp::Ordering::Equal));
+        sorted.sort_by(|a, b| {
+            b.amount
+                .partial_cmp(&a.amount)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
         for b in &sorted {
             if remaining >= bundle_size {
                 allocations.push(Allocation {
@@ -116,9 +137,13 @@ mod tests {
     #[test]
     fn test_single_winner() {
         let result = AuctionResult {
-            auction_id: "a1".into(), auction_type: crate::auction::AuctionType::Sealed,
-            winner: Some("alice".into()), winning_amount: 100.0, clearing_price: 100.0,
-            bids_evaluated: 2, settled_at: None,
+            auction_id: "a1".into(),
+            auction_type: crate::auction::AuctionType::Sealed,
+            winner: Some("alice".into()),
+            winning_amount: 100.0,
+            clearing_price: 100.0,
+            bids_evaluated: 2,
+            settled_at: None,
         };
         let alloc = ResourceAllocator::new(1000.0, "gpu");
         let out = alloc.allocate_single_winner(&result);
@@ -138,7 +163,11 @@ mod tests {
 
     #[test]
     fn test_fixed_bundle() {
-        let bids = vec![Bid::new("alice", 200.0), Bid::new("bob", 100.0), Bid::new("carol", 50.0)];
+        let bids = vec![
+            Bid::new("alice", 200.0),
+            Bid::new("bob", 100.0),
+            Bid::new("carol", 50.0),
+        ];
         let alloc = ResourceAllocator::new(200.0, "gpu");
         let out = alloc.allocate_fixed_bundle(&bids, 100.0);
         assert_eq!(out.allocations.len(), 2);

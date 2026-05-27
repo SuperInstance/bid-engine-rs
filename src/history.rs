@@ -92,7 +92,7 @@ impl AuctionHistory {
             .into_iter()
             .map(|(k, (wins, spent))| (k, wins, spent))
             .collect();
-        board.sort_by(|a, b| b.1.cmp(&a.1));
+        board.sort_by_key(|b| std::cmp::Reverse(b.1));
         board.truncate(limit);
         board
     }

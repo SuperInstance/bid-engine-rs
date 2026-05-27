@@ -5,9 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
       - run: cargo test
       - run: cargo clippy -- -D warnings
       - run: cargo fmt --check
+=======
+      - run: cargo test
+      - run: cargo clippy -- -D warnings
+      - run: cargo fmt -- --check
+>>>>>>> 318a237 (Initial Rust port: auction bid engine)

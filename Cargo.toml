@@ -1,0 +1,13 @@
+[package]
+name = "bid-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Auction engine with English, Dutch, Sealed-bid, and Vickrey auctions — Rust port of bid-engine"
+license = "MIT"
+keywords = ["auction", "bidding", "vickrey", "dutch", "english"]
+categories = ["finance", "algorithms"]
+repository = "https://github.com/SuperInstance/bid-engine-rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

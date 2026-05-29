@@ -58,3 +58,5 @@ assert!((result.clearing_price - 120.0).abs() < 0.01); // pays second price
 ## License
 
 MIT
+
+Part of the [SuperInstance OpenConstruct](https://github.com/SuperInstance/OpenConstruct) ecosystem.
